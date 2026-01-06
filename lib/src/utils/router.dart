@@ -6,7 +6,7 @@ import 'package:practic_application/src/models/order_model.dart';
 import 'package:practic_application/src/feature/earnings/provider/earnings_provider.dart';
 
 // --- COMMON & AUTH ---
-import 'package:practic_application/src/common/views/splash.dart';
+import 'package:practic_application/src/common/widget//splash.dart';
 import 'package:practic_application/src/feature/auth/views/login_screen.dart';
 import 'package:practic_application/src/feature/auth/views/otp_screen.dart';
 import 'package:practic_application/src/feature/auth/views/profile_screen.dart';
@@ -45,6 +45,15 @@ import 'package:practic_application/src/feature/profile/views/language_settings_
 import 'package:practic_application/src/feature/profile/views/privacy_security_screen.dart';
 import 'package:practic_application/src/feature/profile/views/delete_account_screen.dart';
 import 'package:practic_application/src/feature/profile/views/about_screen.dart';
+import 'package:practic_application/src/feature/home/views/active_order_details_screen.dart';
+import 'package:practic_application/src/feature/home/views/order_navigation_screen.dart';
+
+import '../feature/home/views/active_delivery_screen.dart';
+import '../feature/home/views/confirm_delivery_screen.dart';
+import '../feature/home/views/confirm_pickup_screen.dart';
+import '../feature/home/views/delivery_success_screen.dart';
+
+
 
 class AppRouter {
   static final router = GoRouter(
@@ -109,6 +118,16 @@ class AppRouter {
       GoRoute(path: '/privacy', builder: (context, state) => const PrivacySecurityScreen()),
       GoRoute(path: '/delete-account', builder: (context, state) => const DeleteAccountScreen()),
       GoRoute(path: '/about', builder: (context, state) => const AboutScreen()),
+      // The screen that shows items and journey after accepting
+      GoRoute(path: '/active-order', builder: (context, state) => const ActiveOrderDetailsScreen(),),
+
+      // The screen with the Map and "I've Reached Store" button
+      GoRoute(path: '/order-navigation', builder: (context, state) => const OrderNavigationScreen(),),
+      // Add these routes to your AppRouter
+      GoRoute(path: '/confirm-pickup', builder: (context, state) => const ConfirmPickupScreen()),
+      GoRoute(path: '/active-delivery', builder: (context, state) => const ActiveDeliveryScreen()),
+      GoRoute(path: '/confirm-delivery', builder: (context, state) => const ConfirmDeliveryScreen()),
+      GoRoute(path: '/delivery-success', builder: (context, state) => const DeliverySuccessScreen()),
     ],
   );
 }

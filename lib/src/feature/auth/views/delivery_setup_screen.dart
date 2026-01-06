@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../common/views/primary_button.dart';
-import '../../../common/views/auth_header.dart';
-import '../../../common/views/custom_text_field.dart';
+import '../../../common/widget/primary_button.dart';
+import '../widget/auth_header.dart';
+import '../../../common/widget/custom_text_field.dart';
 import '../provider/delivery_setup_provider.dart';
 
 class DeliverySetupScreen extends ConsumerWidget {

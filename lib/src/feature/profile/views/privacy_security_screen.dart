@@ -60,13 +60,13 @@ class PrivacySecurityScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                  border: Border.all(color: Colors.orange.shade200),
+                  border: Border.all(color: Colors.deepOrange),
                   borderRadius: BorderRadius.circular(16)
               ),
               child: Column(
                   children: [
                     const Text("Danger Zone",
-                        style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                        style: TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
@@ -74,7 +74,7 @@ class PrivacySecurityScreen extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: () => context.push('/delete-account'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
+                          backgroundColor: Colors.deepOrange,
                           elevation: 0,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),

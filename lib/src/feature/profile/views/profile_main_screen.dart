@@ -42,9 +42,9 @@ class ProfileMainScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             SizedBox(width: double.infinity, height: 55, child: OutlinedButton.icon(
               onPressed: () {},
-              icon: const Icon(Icons.logout, color: Colors.orange),
-              label: const Text("Logout", style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
-              style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.orange), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+              icon: const Icon(Icons.logout, color: Colors.deepOrange),
+              label: const Text("Logout", style: TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold)),
+              style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.deepOrange), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
             )),
             const SizedBox(height: 40),
             const Text("FirstStore v2.5.0", style: TextStyle(color: Colors.grey, fontSize: 12)),

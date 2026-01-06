@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../common/views/stat_card.dart';
+import '../../../common/widget//stat_card.dart';
 
 class EarningsStatsGrid extends StatelessWidget {
   final bool isWeekly; // This flag changes the UI style

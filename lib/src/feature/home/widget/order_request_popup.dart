@@ -17,19 +17,27 @@ class OrderRequestPopup extends StatelessWidget {
   Widget build(BuildContext context) {
     const Color brandTeal = Color(0xFF00C1AA);
 
-    return Dialog( // Changed to Dialog for centering
+    return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20), // Padding from screen edges
+      // Prevents the dialog from being too wide on tablets but keeps it responsive on phones
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24), // Rounded corners all around
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            )
+          ],
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // Takes only necessary space
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // 1. "New Delivery Request" Pill
+            // 1. "New Delivery Request" Pill Badge
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
@@ -42,41 +50,54 @@ class OrderRequestPopup extends StatelessWidget {
                   Text("🚀 ", style: TextStyle(fontSize: 14)),
                   Text(
                     "New Delivery Request",
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 20),
 
-            // 2. Header
+            // 2. Main Brand Header & Pickup Location
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 "FirstStore",
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
+                ),
               ),
             ),
+            const SizedBox(height: 4),
             Row(
               children: [
                 const Icon(Icons.location_on_outlined, size: 20, color: Colors.grey),
                 const SizedBox(width: 4),
                 Text(
                   request.pickupLocation,
-                  style: const TextStyle(fontSize: 18, color: Color(0xFF4A4A4A), fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF4A4A4A),
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
-            // 3. Stats Grid (Pickup Distance & Earnings)
+            // 3. Stats Row (Pickup Distance & Earnings)
             Row(
               children: [
                 _buildStatBox(
                   label: "Pickup Distance",
                   value: "${request.pickupDistance} km",
                   icon: Icons.near_me_outlined,
-                  color: const Color(0xFFE8F0FE),
+                  color: const Color(0xFFE8F0FE), // Light blue tint
                   iconColor: Colors.blue,
                 ),
                 const SizedBox(width: 12),
@@ -84,19 +105,20 @@ class OrderRequestPopup extends StatelessWidget {
                   label: "Earnings",
                   value: "₹${request.estimatedEarnings.toStringAsFixed(0)}",
                   icon: Icons.currency_rupee,
-                  color: const Color(0xFFE7F9F2),
+                  color: const Color(0xFFE7F9F2), // Light green tint
                   iconColor: Colors.green,
                 ),
               ],
             ),
             const SizedBox(height: 16),
 
-            // 4. Drop Location Card
+            // 4. Drop Location Info Card
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: const Color(0xFFF8F9FA),
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade100),
               ),
               child: Row(
                 children: [
@@ -106,17 +128,26 @@ class OrderRequestPopup extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text("Drop Location", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                        const Text(
+                          "Drop Location",
+                          style: TextStyle(color: Colors.grey, fontSize: 11),
+                        ),
                         Text(
                           request.dropLocation,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
                         ),
                       ],
                     ),
                   ),
                   Text(
                     "${request.dropDistance} km",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      color: Colors.black87,
+                    ),
                   ),
                 ],
               ),
@@ -128,48 +159,69 @@ class OrderRequestPopup extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFF9E6),
+                color: const Color(0xFFFFF9E6), // Soft yellow background
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.access_time_filled, color: Colors.orange, size: 20),
+                  const Icon(Icons.access_time_filled, color: Colors.orange, size: 18),
                   const SizedBox(width: 8),
                   Text(
                     "Estimated delivery time: ${request.estimatedTime}",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
 
-            // 6. Action Buttons
+            // 6. Action Buttons Row
             Row(
               children: [
+                // Decline Button
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: onDecline,
-                    icon: const Icon(Icons.close, color: Colors.red),
-                    label: const Text("Decline", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                    icon: const Icon(Icons.close, color: Colors.red, size: 18),
+                    label: const Text(
+                      "Decline",
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: const BorderSide(color: Colors.red),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      side: const BorderSide(color: Colors.red, width: 1.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
+                // Accept Button
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: onAccept,
-                    icon: const Icon(Icons.check, color: Colors.white),
-                    label: const Text("Accept Order", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    icon: const Icon(Icons.check, color: Colors.white, size: 18),
+                    label: const Text(
+                      "Accept Order",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: brandTeal,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       elevation: 0,
                     ),
                   ),
@@ -178,10 +230,14 @@ class OrderRequestPopup extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // 7. Auto-reject Timer
+            // 7. Auto-reject Helper Text
             const Text(
               "Auto-reject in 30 seconds",
-              style: TextStyle(color: Colors.grey, fontSize: 12),
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 11,
+                fontStyle: FontStyle.italic,
+              ),
             ),
           ],
         ),
@@ -189,7 +245,7 @@ class OrderRequestPopup extends StatelessWidget {
     );
   }
 
-  // Helper function for the blue and green small boxes
+  // Private Helper for the Distance/Earnings small boxes
   Widget _buildStatBox({
     required String label,
     required String value,
@@ -206,14 +262,27 @@ class OrderRequestPopup extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, color: iconColor, size: 24),
+            Icon(icon, color: iconColor, size: 22),
             const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: const TextStyle(fontSize: 10, color: Colors.black54)),
-                Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: const TextStyle(fontSize: 10, color: Colors.black54),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

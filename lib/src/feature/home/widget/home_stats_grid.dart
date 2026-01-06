@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../common/views/stat_card.dart';
+import '../../../common/widget//stat_card.dart';
 
 class HomeStatsGrid extends StatelessWidget {
   final double? earnings; // Nullable

@@ -13,7 +13,7 @@ import '../widget/weekly_summary_card.dart';
 
 // Core & Common
 import '../provider/earnings_provider.dart';
-import '../../../common/views/primary_button.dart';
+import '../../../common/widget//primary_button.dart';
 
 class EarningsScreen extends ConsumerWidget {
   const EarningsScreen({super.key});

@@ -20,7 +20,7 @@ class SettingsScreen extends StatelessWidget {
           ProfileMenuTile(title: "Privacy & Security", icon: Icons.lock_outline, onTap: () => context.push('/privacy')),
           ProfileMenuTile(title: "About FirstStore", icon: Icons.info_outline, onTap: () => context.push('/about')),
           const SizedBox(height: 24),
-          SizedBox(width: double.infinity, height: 55, child: OutlinedButton(onPressed: () {}, child: const Text("Logout", style: TextStyle(color: Colors.orange)))),
+          SizedBox(width: double.infinity, height: 55, child: OutlinedButton(onPressed: () {}, child: const Text("Logout", style: TextStyle(color: Colors.deepOrange)))),
         ]),
       ),
     );

@@ -1,129 +1,128 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart'; // 1. Added for navigation
+import 'package:go_router/go_router.dart';
+
+// --- COMMON WIDGETS ---
+import 'package:practic_application/src/common/widget/primary_button.dart';
+import 'package:practic_application/src/common/widget/custom_text_field.dart';
+
+// --- LOCAL AUTH WIDGETS ---
+import 'package:practic_application/src/feature/auth/widget/auth_header.dart';
+import 'package:practic_application/src/feature/auth/widget/auth_back_button.dart';
+import 'package:practic_application/src/feature/auth/widget/country_code_selector.dart';
+
+// --- PROVIDER ---
 import 'package:practic_application/src/feature/auth/provider/login_provider.dart';
-import 'package:practic_application/src/common/views/primary_button.dart'; // 2. Added reusable button
-import 'package:practic_application/src/common/views/auth_header.dart';   // 3. Added reusable header
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Listen to the state from Riverpod
-    final loginState = ref.watch(loginProvider);
-    final loginNotifier = ref.read(loginProvider.notifier);
+    // Watch the login state
+    final state = ref.watch(loginProvider);
+    final notifier = ref.read(loginProvider.notifier);
+
+    const Color brandTeal = Color(0xFF00C1AA);
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.grey.shade300),
-            ),
-            child: const BackButton(color: Colors.black),
-          ),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // REUSED COMPONENT: Logo + Brand
-            const AuthHeader(),
+      body: SafeArea(
+        child: SingleChildScrollView( // Prevents keyboard overflow
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+                const AuthBackButton(), // Circular Back Button
+                const SizedBox(height: 40),
+                const AuthHeader(),     // Logo + FirstStore
+                const SizedBox(height: 32),
 
-            const SizedBox(height: 32),
-            const Text(
-              'Deliver Fast. Earn More.',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const Text(
-              'Join FirstStore as a Delivery Partner and start earning today.',
-              style: TextStyle(color: Colors.grey),
-            ),
-
-            const SizedBox(height: 40),
-            const Text('Mobile Number', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-
-            // Phone Input Field
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: Text('🇮🇳 +91 ▾', style: TextStyle(fontSize: 16)),
+                const Text(
+                  'Deliver Fast. Earn More.',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                    color: Color(0xFF161616),
                   ),
-                  Container(width: 1, height: 30, color: Colors.grey.shade300),
-                  Expanded(
-                    child: TextField(
-                      onChanged: loginNotifier.updateNumber,
-                      keyboardType: TextInputType.phone,
-                      inputFormatters: [LengthLimitingTextInputFormatter(10)],
-                      decoration: const InputDecoration(
-                        hintText: 'Enter your mobile number',
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Join FirstStore as a Delivery Partner and start earning today.',
+                  style: TextStyle(
+                    color: Colors.black54,
+                    fontSize: 15,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 48),
+
+                // --- PHONE INPUT SECTION ---
+                CustomTextField(
+                  label: "Mobile Number",
+                  hintText: "Enter your mobile number",
+                  keyboardType: TextInputType.phone,
+                  maxLength: 10, // Forces industry standard 10 digits
+                  prefix: CountryCodeSelector(selectedCode: state.countryCode),
+                  onChanged: notifier.updateNumber,
+                ),
+
+                const SizedBox(height: 20),
+
+                // --- AGREEMENT SECTION ---
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 24, width: 24,
+                      child: Checkbox(
+                        value: state.isAgreed,
+                        onChanged: notifier.toggleAgreement,
+                        activeColor: brandTeal,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                        side: BorderSide(color: Colors.grey.shade300, width: 1.5),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Agreement Checkbox
-            Row(
-              children: [
-                Checkbox(
-                  value: loginState.isAgreed,
-                  onChanged: loginNotifier.toggleAgreement,
-                  activeColor: const Color(0xFF00C1AA),
-                ),
-                const Expanded(
-                  child: Text.rich(
-                    TextSpan(
-                      text: 'I agree to FirstStore\'s ',
-                      children: [
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text.rich(
                         TextSpan(
-                          text: 'User Agreement',
-                          style: TextStyle(color: Color(0xFF00C1AA)),
+                          text: "I agree to FirstStore's ",
+                          style: TextStyle(fontSize: 13, color: Colors.black54),
+                          children: [
+                            TextSpan(
+                              text: "User Agreement",
+                              style: TextStyle(color: brandTeal, fontWeight: FontWeight.bold),
+                            ),
+                            TextSpan(text: " & "),
+                            TextSpan(
+                              text: "Privacy Policy",
+                              style: TextStyle(color: brandTeal, fontWeight: FontWeight.bold),
+                            ),
+                          ],
                         ),
-                        TextSpan(text: ' & '),
-                        TextSpan(
-                          text: 'Privacy Policy',
-                          style: TextStyle(color: Color(0xFF00C1AA)),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
+
+                const SizedBox(height: 48), // Spacing instead of Spacer for ScrollView
+
+                // --- ACTION BUTTON ---
+                PrimaryButton(
+                  text: "Next",
+                  // Button only activates if number is exactly 10 digits AND checkbox is ticked
+                  onPressed: state.isFormValid
+                      ? () => context.push('/otp')
+                      : null,
+                ),
+                const SizedBox(height: 24),
               ],
             ),
-
-            const Spacer(),
-
-            // REUSED COMPONENT: Primary Button with Navigation
-            PrimaryButton(
-              text: 'Next',
-              // Logic: only navigates if 10 digits are entered and checkbox is ticked
-              onPressed: loginState.isFormValid
-                  ? () => context.push('/otp') // Must have the '/'
-                  : null,
-            ),
-          ],
+          ),
         ),
       ),
     );

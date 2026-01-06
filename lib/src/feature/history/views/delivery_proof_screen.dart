@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../common/views/primary_button.dart'; // REUSING YOUR BUTTON
+import '../../../common/widget//primary_button.dart'; // REUSING YOUR BUTTON
 
 class DeliveryProofScreen extends StatelessWidget {
   const DeliveryProofScreen({super.key});

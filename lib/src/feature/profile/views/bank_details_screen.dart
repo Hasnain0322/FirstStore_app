@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../widget/profile_info_banner.dart';
-import '../../../common/views/primary_button.dart';
+import '../../../common/widget//primary_button.dart';
 
 class BankDetailsScreen extends StatelessWidget {
   const BankDetailsScreen({super.key});

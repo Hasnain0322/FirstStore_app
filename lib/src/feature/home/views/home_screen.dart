@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-// --- MODELS & POPUPS ---
+// --- MODELS ---
 import '../../../models/order_request_model.dart';
-import '../widget/order_request_popup.dart';
+import '../../../models/active_order_model.dart';
 
 // --- MODULAR WIDGETS ---
+import '../widget/order_request_popup.dart';
 import '../widget/home_header.dart';
 import '../widget/home_status_toggle.dart';
 import '../widget/home_stats_grid.dart';
@@ -18,7 +20,7 @@ import '../widget/home_quick_tips.dart';
 import '../../earnings/views/earnings_screen.dart';
 import '../../history/views/history_screen.dart';
 import '../../support/views/support_screen.dart';
-import '../../profile/views/profile_main_screen.dart'; // 1. IMPORTED PROFILE
+import '../../profile/views/profile_main_screen.dart';
 
 // --- PROVIDERS ---
 import '../providers/home_provider.dart';
@@ -28,11 +30,10 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Watch the state for tab switching and online status
     final state = ref.watch(homeProvider);
     final notifier = ref.read(homeProvider.notifier);
 
-    // Industry Standard: Force dark status bar icons for light background
+    // Force dark icons for the status bar on a light background
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
       statusBarColor: Colors.transparent,
     ));
@@ -43,19 +44,19 @@ class HomeScreen extends ConsumerWidget {
         child: IndexedStack(
           index: state.currentIndex,
           children: [
-            // Index 0: Home Dashboard
-            _HomeDashboardAssembly(state: state, notifier: notifier),
+            // Index 0: Home Dashboard tab
+            const _HomeDashboardAssembly(),
 
-            // Index 1: Earnings
+            // Index 1: Earnings tab
             const EarningsScreen(),
 
-            // Index 2: History
+            // Index 2: History tab
             const HistoryScreen(),
 
-            // Index 3: Support
+            // Index 3: Support tab
             const SupportScreen(),
 
-            // Index 4: Profile Dashboard (NOW LINKED)
+            // Index 4: Profile Dashboard tab
             const ProfileMainScreen(),
           ],
         ),
@@ -64,13 +65,12 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  // --- REUSABLE BOTTOM NAVIGATION ---
   Widget _buildBottomNav(HomeState state, HomeNotifier notifier) {
     return BottomNavigationBar(
       currentIndex: state.currentIndex,
       onTap: notifier.setIndex,
       type: BottomNavigationBarType.fixed,
-      selectedItemColor: const Color(0xFF00C1AA), // Brand Teal
+      selectedItemColor: const Color(0xFF00C1AA),
       unselectedItemColor: Colors.grey,
       selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
       items: const [
@@ -85,43 +85,71 @@ class HomeScreen extends ConsumerWidget {
 }
 
 // --- DASHBOARD TAB ASSEMBLY ---
-class _HomeDashboardAssembly extends StatelessWidget {
-  final HomeState state;
-  final HomeNotifier notifier;
+// Refactored to ConsumerWidget so it can access 'ref' for the Accept Order logic
+class _HomeDashboardAssembly extends ConsumerWidget {
+  const _HomeDashboardAssembly();
 
-  const _HomeDashboardAssembly({
-    required this.state,
-    required this.notifier
-  });
-
-  // Function to show the centered "New Order" Popup
-  void _showNewOrderPopup(BuildContext context) {
-    final mockRequest = OrderRequestModel(
-      id: "FS1234",
-      pickupLocation: "Park Street, Kolkata",
-      dropLocation: "Salt Lake, Sector V",
+  void _showNewOrderPopup(BuildContext context, WidgetRef ref) {
+    // 1. Prepare the Mock Data for the Order the partner is about to accept
+    final mockOrder = ActiveOrderModel(
+      orderId: "12458",
+      pickupLocation: "Salt Lake Sector V",
+      dropLocation: "New Town Action Area, Kolkata",
       pickupDistance: 0.6,
       dropDistance: 2.4,
-      estimatedEarnings: 45.0,
+      earnings: 45.0,
+      customerName: "Rahul Sharma",
+      pickupTime: "3:10 PM",
+      finalTime: "3:24 PM",
+      date: "25 Nov",
+      items: [
+        OrderItem(name: "Fresh Milk (1L)", quantity: 2, price: 98),
+        OrderItem(name: "Brown Bread", quantity: 1, price: 45),
+        OrderItem(name: "Eggs (6 pcs)", quantity: 1, price: 72),
+      ],
+    );
+
+    // 2. Prepare the UI model for the Popup
+    final uiRequest = OrderRequestModel(
+      id: mockOrder.orderId,
+      pickupLocation: "Park Street, Kolkata",
+      dropLocation: mockOrder.dropLocation,
+      pickupDistance: mockOrder.pickupDistance,
+      dropDistance: mockOrder.dropDistance,
+      estimatedEarnings: mockOrder.earnings,
       estimatedTime: "10-25 mins",
     );
 
     showDialog(
       context: context,
-      barrierDismissible: false, // Must click Decline or Accept
+      barrierDismissible: false,
       builder: (context) => OrderRequestPopup(
-        request: mockRequest,
-        onAccept: () => Navigator.pop(context),
-        onDecline: () => Navigator.pop(context),
+        request: uiRequest,
+        onAccept: () {
+          // A. Save the order into the State (Riverpod)
+          ref.read(homeProvider.notifier).acceptOrder(mockOrder);
+
+          // B. Close the Dialog safely
+          Navigator.of(context, rootNavigator: true).pop();
+
+          // C. Navigate to the Order Details screen
+          context.push('/active-order');
+        },
+        onDecline: () {
+          Navigator.of(context, rootNavigator: true).pop();
+        },
       ),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(homeProvider);
+    final notifier = ref.read(homeProvider.notifier);
+
     return RefreshIndicator(
       onRefresh: () async {
-        // Future: API Refresh logic
+        // Industry standard: Pull to refresh logic
       },
       color: const Color(0xFF00C1AA),
       child: SingleChildScrollView(
@@ -133,7 +161,7 @@ class _HomeDashboardAssembly extends StatelessWidget {
             const HomeHeader(),
             const SizedBox(height: 24),
 
-            // 2. DYNAMIC GREETING (Null-Safe)
+            // Greeting based on Provider state
             Text(
                 "Hi, ${state.riderName ?? 'Partner'} 👋",
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)
@@ -144,26 +172,28 @@ class _HomeDashboardAssembly extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // 3. STATUS TOGGLE (Modular)
+            // Dynamic Status Toggle
             HomeStatusToggle(
                 isOnline: state.isOnline,
                 onToggle: notifier.toggleOnline
             ),
             const SizedBox(height: 20),
 
-            // 4. STATS GRID (Dynamic values from state)
+            // Stats Grid with dynamic numbers
             HomeStatsGrid(
               earnings: state.todayEarnings,
               orders: state.totalOrders,
               rating: state.rating,
-              isWeekly: false, // This is the Daily Home View
+              isWeekly: false,
             ),
             const SizedBox(height: 20),
 
-            // 5. CLICKABLE CENTER VIEW (For testing the popup)
+            // Interaction area to test the "New Order" notification
             GestureDetector(
               onTap: () {
-                if (state.isOnline) _showNewOrderPopup(context);
+                if (state.isOnline) {
+                  _showNewOrderPopup(context, ref);
+                }
               },
               child: state.isOnline
                   ? const HomeOnlineView(statusMessage: "Looking for orders...")

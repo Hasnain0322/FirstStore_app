@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Common UI
-import '../../../common/views/primary_button.dart';
-import '../../../common/views/custom_text_field.dart';
+import '../../../common/widget//primary_button.dart';
+import '../../../common/widget//custom_text_field.dart';
 // Modular Support Widgets
 import '../widget/support_info_banner.dart';
 import '../widget/support_quick_chips.dart';

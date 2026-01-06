@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../common/views/custom_text_field.dart';
-import '../../../common/views/primary_button.dart';
+import '../../../common/widget//custom_text_field.dart';
+import '../../../common/widget//primary_button.dart';
 import '../widget/profile_info_banner.dart';
 
 class ChangePhoneScreen extends StatelessWidget {
