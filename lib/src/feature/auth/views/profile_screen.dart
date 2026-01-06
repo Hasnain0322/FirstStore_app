@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../common/widget//primary_button.dart';
+
+// --- COMMON WIDGETS ---
+import 'package:practic_application/src/common/widget/primary_button.dart';
+import 'package:practic_application/src/common/widget/custom_text_field.dart';
+
+// --- LOCAL AUTH WIDGETS ---
 import '../widget/auth_header.dart';
-import '../../../common/widget/custom_text_field.dart';
+import '../widget/auth_back_button.dart';
+
+// --- PROVIDER ---
 import '../provider/profile_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -11,66 +18,76 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profileState = ref.watch(profileProvider);
-    final profileNotifier = ref.read(profileProvider.notifier);
+    // Watch the profile state for validation
+    final state = ref.watch(profileProvider);
+    final notifier = ref.read(profileProvider.notifier);
 
     return Scaffold(
       backgroundColor: Colors.white,
-      // Ensure the screen stays clean when keyboard is up
-      resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: const BackButton(color: Colors.black),
-      ),
-      // 1. ADD SingleChildScrollView HERE
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const AuthHeader(),
-              const SizedBox(height: 32),
-              const Text(
-                'Complete Your Profile',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const Text(
-                'Enter your personal details',
-                style: TextStyle(color: Colors.grey),
-              ),
-              const SizedBox(height: 32),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          // Ensures the screen scrolls when the keyboard opens
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+                const AuthBackButton(),
+                const SizedBox(height: 40),
+                const AuthHeader(),
+                const SizedBox(height: 32),
 
-              CustomTextField(
-                label: 'Full Name',
-                hintText: 'Enter your full name',
-                onChanged: profileNotifier.updateName,
-              ),
+                const Text(
+                  'Complete Your Profile',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                    color: Color(0xFF161616),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Enter your personal details',
+                  style: TextStyle(
+                    color: Colors.black54,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 48),
 
-              const SizedBox(height: 20),
+                // --- FULL NAME INPUT ---
+                CustomTextField(
+                  label: "Full Name",
+                  hintText: "Enter your full name",
+                  keyboardType: TextInputType.name,
+                  onChanged: notifier.updateName,
+                ),
 
-              CustomTextField(
-                label: 'Email Address',
-                hintText: 'Enter your email address',
-                keyboardType: TextInputType.emailAddress,
-                onChanged: profileNotifier.updateEmail,
-              ),
+                const SizedBox(height: 24),
 
-              // 2. REPLACE Spacer() with a fixed SizedBox
-              // Spacer causes errors inside scrollable views
-              const SizedBox(height: 370),
+                // --- EMAIL ADDRESS INPUT ---
+                CustomTextField(
+                  label: "Email Address",
+                  hintText: "Enter your email address",
+                  keyboardType: TextInputType.emailAddress,
+                  onChanged: (val) => notifier.updateEmail(val),
+                ),
 
-              PrimaryButton(
-                text: 'Continue',
-                onPressed: profileState.isFormValid
-                    ? () => context.push('/kyc')
-                    : null,
-              ),
+                const SizedBox(height: 48), // Spacing for ScrollView
 
-              // 3. Add extra space at bottom so keyboard doesn't hide the button
-              const SizedBox(height: 20),
-            ],
+                // --- ACTION BUTTON ---
+                PrimaryButton(
+                  text: "Continue",
+                  // Button only activates if name and email are valid
+                  onPressed: state.isFormValid
+                      ? () => context.push('/kyc')
+                      : null,
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),

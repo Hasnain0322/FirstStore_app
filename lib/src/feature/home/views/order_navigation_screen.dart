@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+// Common
+import '../../../common/widget/primary_button.dart';
+
+// Feature Widgets
+import '../widget/nav_top_card.dart';
 import '../providers/home_provider.dart';
 import '../../../models/active_order_model.dart';
 
@@ -9,64 +15,66 @@ class OrderNavigationScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final order = ref.watch(homeProvider).activeOrder;
     const Color brandTeal = Color(0xFF00C1AA);
-    // Watch the active order to get real-time locations if needed later
-    final activeOrder = ref.watch(homeProvider).activeOrder;
 
     return Scaffold(
       body: Stack(
         children: [
-          // 1. MOCK MAP BACKGROUND (Industry Placeholder)
+          // 1. THE MAP (Industry Standard: Use Stack for Map Background)
           Container(
-            color: Colors.grey.shade100,
+            color: const Color(0xFFEFEFEF),
             width: double.infinity,
             height: double.infinity,
             child: const Center(
               child: Icon(Icons.map_outlined, size: 100, color: Colors.grey),
+              // Later, you will replace this Container with:
+              // GoogleMap(initialCameraPosition: ...),
             ),
           ),
 
-          // 2. TOP FLOATING INFO CARD
+          // 2. FLOATING TOP OVERLAYS
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Column(
                 children: [
+                  const NavTopCard(time: "6 mins", distance: "1.2 km"),
+                  const SizedBox(height: 16),
+                  // "Navigating to..." Banner
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10)],
+                      color: brandTeal,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [BoxShadow(color: brandTeal.withOpacity(0.3), blurRadius: 10)],
                     ),
-                    child: Row(
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Arriving in", style: TextStyle(color: Colors.grey, fontSize: 12)), Text("6 mins", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))])),
-                        const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Distance", style: TextStyle(color: Colors.grey, fontSize: 12)), Text("1.2 km", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))])),
-                        CircleAvatar(backgroundColor: brandTeal, child: IconButton(icon: const Icon(Icons.near_me, color: Colors.white), onPressed: () {})),
+                        Icon(Icons.location_on, color: Colors.white, size: 16),
+                        SizedBox(width: 8),
+                        Text(
+                          "Navigating to FirstStore Partner",
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    decoration: BoxDecoration(color: brandTeal, borderRadius: BorderRadius.circular(30)),
-                    child: const Text("📍 Navigating to FirstStore Partner", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
             ),
           ),
 
-          // 3. BOTTOM INFO CARD & ACTION BUTTON
+          // 3. BOTTOM INFO CARD
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 20)],
+                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 20, offset: Offset(0, -5))],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -76,57 +84,60 @@ class OrderNavigationScreen extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text("FirstStore Partner", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-                            Text(activeOrder?.pickupLocation ?? "Location loading...", style: const TextStyle(color: Colors.grey))
-                          ]
-                      ),
-                      IconButton(onPressed: () {}, icon: const Icon(Icons.call, color: brandTeal, size: 30)),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: const Color(0xFFF0F9F8), borderRadius: BorderRadius.circular(12)),
-                    child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Store Instructions", style: TextStyle(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 4),
-                          Text(activeOrder?.storeInstructions ?? "Follow store protocol.", style: const TextStyle(color: Colors.black54))
-                        ]
-                    ),
+                          const Text("FirstStore Partner", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20)),
+                          Text(order?.pickupLocation ?? "Location details...", style: const TextStyle(color: Colors.grey, fontSize: 14)),
+                        ],
+                      ),
+                      // Circular Call Button
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: brandTeal.withOpacity(0.2)),
+                        ),
+                        child: const Icon(Icons.call, color: brandTeal, size: 28),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 24),
-
-                  // --- THE FIXED BUTTON ---
-                  SizedBox(
+                  // Instruction Box
+                  Container(
                     width: double.infinity,
-                    height: 55,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // A. Update logic: Change status to 'Arrived'
-                        ref.read(homeProvider.notifier).updateActiveOrderStatus(OrderProcessStatus.arrivedAtStore);
-
-                        // B. Navigation logic: Go to Confirm Pickup Screen
-                        context.push('/confirm-pickup');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: brandTeal,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        "I've Reached the Store",
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16),
-                      ),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0F9F8),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("Store Instructions", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
+                        const SizedBox(height: 4),
+                        Text(
+                          order?.storeInstructions ?? "Follow store safety protocols.",
+                          style: const TextStyle(color: Colors.black87, fontSize: 13, height: 1.4),
+                        ),
+                      ],
                     ),
                   ),
+                  const SizedBox(height: 32),
+                  // Primary Action Button
+                  PrimaryButton(
+                    text: "I've Reached the Store",
+                    onPressed: () {
+                      // 1. Update State to Arrived
+                      ref.read(homeProvider.notifier).updateActiveOrderStatus(OrderProcessStatus.arrivedAtStore);
+                      // 2. Navigate to Pickup Confirmation
+                      context.push('/confirm-pickup');
+                    },
+                  ),
+                  const SizedBox(height: 10), // Safe area bottom padding
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
     );

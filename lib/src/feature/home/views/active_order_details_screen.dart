@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../models/active_order_model.dart';
 import '../providers/home_provider.dart';
-import '../widget/order_items_card.dart';
-import '../../history/widget/journey_line.dart'; // Reusing your existing widget
-import '../../history/widget/history_earnings_card.dart'; // Reusing your existing widget
-import '../../../common/widget//primary_button.dart';
+import '../widget/order_journey_stepper.dart';
+import '../widget/shaded_order_items_card.dart';
+import '../widget/order_lifecycle_widgets.dart';
+import '../../../common/widget/primary_button.dart';
+import '../../../models/active_order_model.dart';
 
 class ActiveOrderDetailsScreen extends ConsumerWidget {
   const ActiveOrderDetailsScreen({super.key});
@@ -14,20 +14,24 @@ class ActiveOrderDetailsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final order = ref.watch(homeProvider).activeOrder;
-    if (order == null) return const Scaffold(body: Center(child: Text("No active order")));
+    if (order == null) return const Scaffold(body: Center(child: Text("Order Expired")));
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
       appBar: AppBar(
-        title: const Text("Order Details", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white, elevation: 0,
+        backgroundColor: Colors.white,
+        elevation: 0,
         leading: const BackButton(color: Colors.black),
+        title: const Text("Order Details", style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900)),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16, top: 12, bottom: 12),
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(color: const Color(0xFFE0F7F5), borderRadius: BorderRadius.circular(20)),
-            child: Center(child: Text("Order #${order.orderId}", style: const TextStyle(color: Color(0xFF00C1AA), fontSize: 12, fontWeight: FontWeight.bold))),
+          // Order ID Chip in the App Bar
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(color: const Color(0xFFE0F7F5), borderRadius: BorderRadius.circular(20)),
+              child: Text("Order #${order.orderId}", style: const TextStyle(color: Color(0xFF00C1AA), fontSize: 11, fontWeight: FontWeight.w900)),
+            ),
           )
         ],
       ),
@@ -35,39 +39,77 @@ class ActiveOrderDetailsScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // 1. Delivery Journey Card
+            // 1. DELIVERY JOURNEY CARD
             Container(
+              width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Delivery Journey", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                  const SizedBox(height: 16),
-                  JourneyLine(pickup: "FirstStore Partner\n${order.pickupLocation}", drop: "${order.dropLocation}"),
+                  const Text("Delivery Journey", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
+                  const SizedBox(height: 20),
+                  OrderJourneyStepper(
+                    pickupName: "FirstStore Partner",
+                    pickupAddress: order.pickupLocation,
+                    pickupDistance: "${order.pickupDistance} km away",
+                    deliverName: order.customerName,
+                    deliverAddress: order.dropLocation,
+                    deliverDistance: "${order.dropDistance} km from pickup",
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 20),
 
-            // 2. Items List
-            OrderItemsCard(items: order.items, totalValue: order.totalOrderValue),
+            // 2. ITEMS CARD
+            ShadedOrderItemsCard(items: order.items, totalValue: order.totalOrderValue),
             const SizedBox(height: 20),
 
-            // 3. Earnings Card (Reused)
-            HistoryEarningsCard(amount: "₹${order.earnings.toStringAsFixed(0)}"),
+            // 3. EARNINGS BANNER (Picture Perfect match)
+            _buildEarningsBanner(order.earnings.toStringAsFixed(0)),
 
             const SizedBox(height: 40),
 
+            // 4. ACTION BUTTON
             PrimaryButton(
               text: "Start Navigation",
+              icon: Icons.arrow_forward,
               onPressed: () {
-                ref.read(homeProvider.notifier).updateOrderStatus(OrderProcessStatus.navigatingToStore);
+                ref.read(homeProvider.notifier).updateActiveOrderStatus(OrderProcessStatus.navigatingToStore);
                 context.push('/order-navigation');
               },
             ),
+            const SizedBox(height: 24),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildEarningsBanner(String amount) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE7F9F2).withOpacity(0.5),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF00C1AA).withOpacity(0.2)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("Your Earnings", style: TextStyle(color: Colors.grey, fontSize: 13)),
+              Text("₹ $amount", style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 22)),
+            ],
+          ),
+          const CircleAvatar(
+            backgroundColor: Color(0xFF32BA7C),
+            child: Text("₹", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+          ),
+        ],
       ),
     );
   }

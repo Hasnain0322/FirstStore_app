@@ -33,13 +33,14 @@ class HomeScreen extends ConsumerWidget {
     final state = ref.watch(homeProvider);
     final notifier = ref.read(homeProvider.notifier);
 
-    // Force dark icons for the status bar on a light background
+    // Industry Standard: Force dark status bar icons for light background (#F9F9F9)
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
       statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
     ));
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9),
+      backgroundColor: const Color(0xFFF9F9F9), // Pixel perfect background color
       body: SafeArea(
         child: IndexedStack(
           index: state.currentIndex,
@@ -65,32 +66,36 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
+  // --- REUSABLE BOTTOM NAVIGATION ---
   Widget _buildBottomNav(HomeState state, HomeNotifier notifier) {
+    const Color brandTeal = Color(0xFF00C1AA);
     return BottomNavigationBar(
       currentIndex: state.currentIndex,
       onTap: notifier.setIndex,
       type: BottomNavigationBarType.fixed,
-      selectedItemColor: const Color(0xFF00C1AA),
+      backgroundColor: Colors.white,
+      selectedItemColor: brandTeal,
       unselectedItemColor: Colors.grey,
-      selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+      selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+      unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+      elevation: 10,
       items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: "Home"),
-        BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_outlined), label: "Earnings"),
-        BottomNavigationBarItem(icon: Icon(Icons.history), label: "History"),
-        BottomNavigationBarItem(icon: Icon(Icons.headset_mic_outlined), label: "Support"),
-        BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: "Profile"),
+        BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: "Home"),
+        BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_outlined), activeIcon: Icon(Icons.account_balance_wallet), label: "Earnings"),
+        BottomNavigationBarItem(icon: Icon(Icons.history), activeIcon: Icon(Icons.history_toggle_off), label: "History"),
+        BottomNavigationBarItem(icon: Icon(Icons.headset_mic_outlined), activeIcon: Icon(Icons.headset_mic), label: "Support"),
+        BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: "Profile"),
       ],
     );
   }
 }
 
 // --- DASHBOARD TAB ASSEMBLY ---
-// Refactored to ConsumerWidget so it can access 'ref' for the Accept Order logic
 class _HomeDashboardAssembly extends ConsumerWidget {
   const _HomeDashboardAssembly();
 
   void _showNewOrderPopup(BuildContext context, WidgetRef ref) {
-    // 1. Prepare the Mock Data for the Order the partner is about to accept
+    // 1. Mock Data for a real Order Lifecycle
     final mockOrder = ActiveOrderModel(
       orderId: "12458",
       pickupLocation: "Salt Lake Sector V",
@@ -109,7 +114,7 @@ class _HomeDashboardAssembly extends ConsumerWidget {
       ],
     );
 
-    // 2. Prepare the UI model for the Popup
+    // 2. Map to the Popup UI Model
     final uiRequest = OrderRequestModel(
       id: mockOrder.orderId,
       pickupLocation: "Park Street, Kolkata",
@@ -126,18 +131,11 @@ class _HomeDashboardAssembly extends ConsumerWidget {
       builder: (context) => OrderRequestPopup(
         request: uiRequest,
         onAccept: () {
-          // A. Save the order into the State (Riverpod)
           ref.read(homeProvider.notifier).acceptOrder(mockOrder);
-
-          // B. Close the Dialog safely
           Navigator.of(context, rootNavigator: true).pop();
-
-          // C. Navigate to the Order Details screen
           context.push('/active-order');
         },
-        onDecline: () {
-          Navigator.of(context, rootNavigator: true).pop();
-        },
+        onDecline: () => Navigator.of(context, rootNavigator: true).pop(),
       ),
     );
   }
@@ -149,46 +147,48 @@ class _HomeDashboardAssembly extends ConsumerWidget {
 
     return RefreshIndicator(
       onRefresh: () async {
-        // Industry standard: Pull to refresh logic
+        // Handle pull-to-refresh logic here
       },
       color: const Color(0xFF00C1AA),
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Top Section: Profile & Location
             const HomeHeader(),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
 
-            // Greeting based on Provider state
+            // Greeting Section (Refined Weights)
             Text(
                 "Hi, ${state.riderName ?? 'Partner'} 👋",
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)
+                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: -0.5)
             ),
+            const SizedBox(height: 4),
             const Text(
                 "Ready to deliver today?",
-                style: TextStyle(color: Colors.grey)
+                style: TextStyle(color: Colors.grey, fontSize: 16, fontWeight: FontWeight.w500)
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
-            // Dynamic Status Toggle
+            // Online/Offline Switch Component
             HomeStatusToggle(
                 isOnline: state.isOnline,
                 onToggle: notifier.toggleOnline
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
-            // Stats Grid with dynamic numbers
+            // 3-Card Stats Grid (Earnings, Orders, Rating)
             HomeStatsGrid(
               earnings: state.todayEarnings,
               orders: state.totalOrders,
               rating: state.rating,
               isWeekly: false,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
-            // Interaction area to test the "New Order" notification
+            // Center Interaction View (Dashed Box Icon)
             GestureDetector(
               onTap: () {
                 if (state.isOnline) {
@@ -200,8 +200,11 @@ class _HomeDashboardAssembly extends ConsumerWidget {
                   : const HomeOfflineView(),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
+
+            // Bottom Tips Section
             const HomeQuickTips(),
+            const SizedBox(height: 16),
           ],
         ),
       ),
